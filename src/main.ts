@@ -68,7 +68,6 @@ export default class SuperTutorPlugin extends Plugin {
 
 	onunload(): void {
 		this.unloaded = true;
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_REVIEW);
 	}
 
 	addRefreshListener(listener: () => void): () => void {

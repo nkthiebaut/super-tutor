@@ -1,4 +1,4 @@
-import { App, Modal, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, Modal, Notice, PluginSettingTab, Setting, type SettingDefinitionItem } from "obsidian";
 import type SuperTutorPlugin from "./main";
 import { DEFAULT_MODEL } from "./types";
 
@@ -8,6 +8,68 @@ export class SuperTutorSettingTab extends PluginSettingTab {
 	constructor(app: App, plugin: SuperTutorPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+	}
+
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		return [
+			{
+				name: "Review notes",
+				desc: "Notes tagged #review are scheduled with SM-2. Questions and due dates stay in plugin data, not in the note.",
+			},
+			{
+				type: "group",
+				heading: "ChatGPT",
+				items: [
+					{
+						name: "OpenAI API key",
+						desc: "Stored locally in this vault’s plugin data and used only to generate questions.",
+						render: (setting) => {
+							setting.addText((text) => {
+								text.inputEl.type = "password";
+								text.setPlaceholder("sk-...")
+									.setValue(this.plugin.store.data.settings.openaiApiKey)
+									.onChange(async (value) => {
+										this.plugin.store.data.settings.openaiApiKey = value.trim();
+										await this.plugin.persist();
+										this.plugin.refreshViews();
+									});
+							});
+						},
+					},
+					{
+						name: "Model",
+						desc: `${DEFAULT_MODEL} is the default Chat Completions model.`,
+						render: (setting) => {
+							setting.addText((text) => {
+								text.setPlaceholder(DEFAULT_MODEL)
+									.setValue(this.plugin.store.data.settings.model)
+									.onChange(async (value) => {
+										const model = value.trim() || DEFAULT_MODEL;
+										this.plugin.store.data.settings.model = model;
+										if (!value.trim()) {
+											text.setValue(model);
+										}
+										await this.plugin.persist();
+									});
+							});
+						},
+					},
+				],
+			},
+			{
+				type: "group",
+				heading: "Schedule",
+				items: [
+					{
+						name: "Reset all review schedules",
+						desc: "Sets every note currently tagged #review back to new: due today, ease 2.5, and no review history. Questions are kept.",
+						action: () => {
+							this.confirmReset();
+						},
+					},
+				],
+			},
+		];
 	}
 
 	display(): void {
@@ -56,16 +118,17 @@ export class SuperTutorSettingTab extends PluginSettingTab {
 			.setName("Reset all review schedules")
 			.setDesc("Sets every note currently tagged #review back to new: due today, ease 2.5, and no review history. Questions are kept.")
 			.addButton((button) => {
-				button
-					.setButtonText("Reset")
-					.setWarning()
-					.onClick(() => {
-						new ConfirmResetModal(this.app, async () => {
-							await this.plugin.resetAllSchedules();
-							new Notice("Review schedules reset.");
-						}).open();
-					});
+				button.setButtonText("Reset").setWarning().onClick(() => {
+					this.confirmReset();
+				});
 			});
+	}
+
+	private confirmReset(): void {
+		new ConfirmResetModal(this.app, async () => {
+			await this.plugin.resetAllSchedules();
+			new Notice("Review schedules reset.");
+		}).open();
 	}
 }
 

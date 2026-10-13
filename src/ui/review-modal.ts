@@ -68,7 +68,7 @@ export class ReviewModal extends Modal {
 
 		if (this.revealed) {
 			const reference = contentEl.createDiv({ cls: "super-tutor-reference" });
-			reference.createEl("div", { cls: "super-tutor-muted", text: "Reference answer" });
+			reference.createDiv({ cls: "super-tutor-muted", text: "Reference answer" });
 			const answer = reference.createDiv();
 			void MarkdownRenderer.render(this.app, question.answer, answer, this.file.path, this.renderer);
 		}

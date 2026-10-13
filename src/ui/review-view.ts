@@ -10,11 +10,6 @@ import { ReviewModal } from "./review-modal";
 
 export const VIEW_TYPE_REVIEW = "super-tutor-review";
 
-interface DueEntry {
-	file: TFile;
-	card: CardState;
-}
-
 export class ReviewView extends ItemView {
 	private removeRefresh: (() => void) | null = null;
 	private generating = false;
