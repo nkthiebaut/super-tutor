@@ -99,7 +99,7 @@ export function parseQuestions(payload: unknown, limit: number): GeneratedQuesti
 	if (!parsed || typeof parsed !== "object" || !("questions" in parsed)) {
 		return [];
 	}
-	const questions = (parsed as { questions: unknown }).questions;
+	const questions = parsed.questions;
 	if (!Array.isArray(questions)) {
 		return [];
 	}

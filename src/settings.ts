@@ -135,7 +135,7 @@ export class SuperTutorSettingTab extends PluginSettingTab {
 class ConfirmResetModal extends Modal {
 	constructor(
 		app: App,
-		private onConfirm: () => void,
+		private onConfirm: () => Promise<void>,
 	) {
 		super(app);
 	}
@@ -153,7 +153,7 @@ class ConfirmResetModal extends Modal {
 		confirm.addClass("mod-warning");
 		confirm.addEventListener("click", () => {
 			this.close();
-			this.onConfirm();
+			void this.onConfirm();
 		});
 	}
 
