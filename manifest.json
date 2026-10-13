@@ -1,0 +1,8 @@
+{
+	"id": "super-tutor",
+	"name": "Super Tutor",
+	"version": "1.0.0",
+	"minAppVersion": "1.5.0",
+	"description": "Spaced repetition for notes tagged #review, with manual or ChatGPT questions.",
+	"isDesktopOnly": false
+}

@@ -1,0 +1,89 @@
+.super-tutor-review {
+	padding: 12px 16px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.super-tutor-section {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.super-tutor-section h4 {
+	margin: 0;
+}
+
+.super-tutor-muted {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	margin: 0;
+}
+
+.super-tutor-due-button {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+	text-align: left;
+}
+
+.super-tutor-due-title {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.super-tutor-question {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding-top: 8px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.super-tutor-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.super-tutor-review-modal textarea,
+.super-tutor-question-modal textarea {
+	width: 100%;
+	min-height: 90px;
+}
+
+.super-tutor-generated-question {
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.super-tutor-generated-question p {
+	margin: 6px 0 12px;
+}
+
+.super-tutor-generated-question.is-rejected {
+	opacity: 0.55;
+}
+
+.super-tutor-reference {
+	background: var(--background-secondary);
+	border-radius: 6px;
+	padding: 8px 12px;
+}
+
+.super-tutor-reference p {
+	margin: 4px 0 0;
+}
+
+.super-tutor-grade-row,
+.super-tutor-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 12px;
+}

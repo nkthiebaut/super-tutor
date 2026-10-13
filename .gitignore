@@ -1,0 +1,21 @@
+# vscode
+.vscode
+
+# Intellij
+*.iml
+.idea
+
+# npm
+node_modules
+
+# Compiled plugin bundle. Upload it with a GitHub release instead.
+main.js
+
+# Exclude sourcemaps
+*.map
+
+# obsidian
+data.json
+
+# macOS
+.DS_Store
