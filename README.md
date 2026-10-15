@@ -25,7 +25,7 @@ For local development, `npm run dev` rebuilds `main.js` as you edit.
 1. Tag a note `#review` (in the body or in frontmatter `tags`).
 2. Open the review sidebar from the ribbon icon or the command **Open review**.
 3. With that note active, add questions or choose **Generate with ChatGPT**. Put an OpenAI API key in the plugin settings first. The default model is `gpt-5-mini`.
-4. AI generation creates three questions. Review their questions and reference answers, accept or reject each one, then add the accepted questions.
+4. AI generation creates three questions. Edit, accept, or reject each question and reference answer, then add the accepted questions.
 5. Choose **Check & improve with ChatGPT** to check the open note. It can propose corrections, rewrites, and concise additions such as caveats, examples, definitions, or useful connections. Review each proposed change, then apply the ones you accept. The command **Check and improve note with ChatGPT** does the same for any open Markdown note. The file changes only for changes you apply.
 6. The questions for the open note and the due notes sit in collapsible sections, with a divider between them. Due notes appear below. Open one to answer its questions. The note blurs while a question is on screen, then comes back into focus when you grade. Reveal each reference answer, then grade the note Again, Hard, Good, or Easy.
 7. The next review date follows SM-2: 1 day, then 6 days, then the interval times the ease factor. Again starts that note over at 1 day.
