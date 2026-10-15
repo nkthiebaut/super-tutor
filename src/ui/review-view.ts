@@ -13,6 +13,8 @@ export const VIEW_TYPE_REVIEW = "super-tutor-review";
 export class ReviewView extends ItemView {
 	private removeRefresh: (() => void) | null = null;
 	private generating = false;
+	private questionsExpanded = true;
+	private dueExpanded = true;
 
 	constructor(
 		leaf: WorkspaceLeaf,
@@ -49,19 +51,22 @@ export class ReviewView extends ItemView {
 		container.empty();
 		container.addClass("super-tutor-review");
 		this.renderCurrentNote(container);
+		container.createDiv({ cls: "super-tutor-separator" });
 		this.renderDue(container);
 		container.scrollTop = scrollTop;
 	}
 
 	private renderDue(container: HTMLElement): void {
-		const section = container.createDiv({ cls: "super-tutor-section" });
 		const today = todayString();
 		const tagged = this.plugin.listTaggedCards();
 		const due = tagged
 			.filter((entry) => isDue(entry.card.due, today))
 			.sort((a, b) => a.card.due.localeCompare(b.card.due) || a.file.basename.localeCompare(b.file.basename));
 
-		section.createEl("h4", { text: due.length > 0 ? `Due (${due.length})` : "Due" });
+		const title = due.length > 0 ? `Due notes (${due.length})` : "Due notes";
+		const section = this.section(container, title, this.dueExpanded, (open) => {
+			this.dueExpanded = open;
+		});
 
 		if (tagged.length === 0) {
 			section.createEl("p", { cls: "super-tutor-muted", text: "No notes are tagged #review." });
@@ -90,8 +95,9 @@ export class ReviewView extends ItemView {
 	}
 
 	private renderCurrentNote(container: HTMLElement): void {
-		const section = container.createDiv({ cls: "super-tutor-section" });
-		section.createEl("h4", { text: "This note" });
+		const section = this.section(container, "Questions", this.questionsExpanded, (open) => {
+			this.questionsExpanded = open;
+		});
 		const file = this.plugin.getActiveNote();
 		if (!file || !fileHasReviewTag(this.app, file)) {
 			section.createEl("p", {
@@ -132,20 +138,40 @@ export class ReviewView extends ItemView {
 			}).open();
 		});
 
+		const busy = this.generating || this.plugin.isVerifying();
+		const hasKey = this.plugin.store.data.settings.openaiApiKey.trim().length > 0;
 		const generate = actions.createEl("button", {
 			text: this.generating ? "Generating…" : "Generate with ChatGPT",
 		});
-		const hasKey = this.plugin.store.data.settings.openaiApiKey.trim().length > 0;
-		generate.disabled = this.generating || !hasKey;
+		generate.disabled = busy || !hasKey;
 		generate.addEventListener("click", () => {
 			void this.generate(file);
+		});
+
+		const verify = actions.createEl("button", {
+			text: this.plugin.isVerifying() ? "Checking…" : "Check & improve with ChatGPT",
+		});
+		verify.disabled = busy || !hasKey;
+		verify.addEventListener("click", () => {
+			void this.plugin.reviewNote(file);
 		});
 		if (!hasKey) {
 			section.createEl("p", {
 				cls: "super-tutor-muted",
-				text: "Add an OpenAI API key in settings to generate questions.",
+				text: "Add an OpenAI API key in settings to generate questions and verify notes.",
 			});
 		}
+	}
+
+	private section(container: HTMLElement, title: string, expanded: boolean, onToggle: (open: boolean) => void): HTMLElement {
+		const section = container.createEl("details", { cls: "super-tutor-section" });
+		section.open = expanded;
+		const summary = section.createEl("summary", { cls: "super-tutor-section-summary" });
+		summary.createEl("h4", { text: title });
+		section.addEventListener("toggle", () => {
+			onToggle(section.open);
+		});
+		return section.createDiv({ cls: "super-tutor-section-body" });
 	}
 
 	private async openReview(file: TFile): Promise<void> {

@@ -1,9 +1,9 @@
 {
 	"id": "super-tutor",
 	"name": "Super Tutor",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"minAppVersion": "1.7.2",
-	"description": "Spaced repetition for notes tagged #review, with manual or ChatGPT questions.",
+	"description": "Spaced repetition for notes tagged #review, with manual or ChatGPT questions and note checks.",
 	"author": "Nicolas Thiebaut",
 	"authorUrl": "https://github.com/nkthiebaut",
 	"isDesktopOnly": false

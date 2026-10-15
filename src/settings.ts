@@ -22,7 +22,7 @@ export class SuperTutorSettingTab extends PluginSettingTab {
 				items: [
 					{
 						name: "OpenAI API key",
-						desc: "Stored locally in this vault’s plugin data and used only to generate questions.",
+						desc: "Stored locally in this vault’s plugin data and used to generate questions and verify notes.",
 						render: (setting) => {
 							setting.addText((text) => {
 								text.inputEl.type = "password";
@@ -84,7 +84,7 @@ export class SuperTutorSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("OpenAI API key")
-			.setDesc("Stored locally in this vault’s plugin data and used only to generate questions.")
+			.setDesc("Stored locally in this vault’s plugin data and used to generate questions and verify notes.")
 			.addText((text) => {
 				text.inputEl.type = "password";
 				text.setPlaceholder("sk-...")

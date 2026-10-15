@@ -3,7 +3,7 @@ export const REVIEW_TAG = "#review";
 export const INITIAL_EASE = 2.5;
 export const MIN_EASE = 1.3;
 
-export const DEFAULT_MODEL = "gpt-5";
+export const DEFAULT_MODEL = "gpt-5-mini";
 export const QUESTIONS_PER_GENERATION = 3;
 export const MAX_NOTE_CHARS = 12_000;
 

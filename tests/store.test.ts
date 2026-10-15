@@ -69,8 +69,9 @@ describe("ReviewStore", () => {
 		});
 
 		assert.equal(store.data.settings.openaiApiKey, "sk-test");
-		assert.equal(store.data.settings.model, "gpt-5");
-		assert.equal(ReviewStore.fromLoaded({ settings: { model: "gpt-4o-mini" } }).data.settings.model, "gpt-5");
+		assert.equal(store.data.settings.model, "gpt-5-mini");
+		assert.equal(ReviewStore.fromLoaded({ settings: { model: "gpt-4o-mini" } }).data.settings.model, "gpt-5-mini");
+		assert.equal(ReviewStore.fromLoaded({ settings: { model: "gpt-5" } }).data.settings.model, "gpt-5-mini");
 		assert.equal(ReviewStore.fromLoaded({ settings: { model: "gpt-4.1" } }).data.settings.model, "gpt-4.1");
 		assert.equal(store.getCard("gone.md"), undefined);
 		assert.equal(store.getCard("bad.md")?.ease, INITIAL_EASE);

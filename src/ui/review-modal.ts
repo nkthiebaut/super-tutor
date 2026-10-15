@@ -1,4 +1,4 @@
-import { Component, MarkdownRenderer, Modal, Notice, type App, type TFile } from "obsidian";
+import { Component, MarkdownRenderer, MarkdownView, Modal, Notice, type App, type EventRef, type TFile } from "obsidian";
 import type SuperTutorPlugin from "../main";
 import { formatInterval, gradeLabel, previewIntervals } from "../scheduler";
 import { GRADES, type Grade } from "../types";
@@ -7,6 +7,8 @@ export class ReviewModal extends Modal {
 	private index = 0;
 	private revealed = false;
 	private answer = "";
+	private reviewingQuestion = false;
+	private layoutRef: EventRef | null = null;
 	private renderer = new Component();
 
 	constructor(
@@ -20,10 +22,18 @@ export class ReviewModal extends Modal {
 	onOpen(): void {
 		this.renderer.load();
 		this.contentEl.addClass("super-tutor-review-modal");
+		this.layoutRef = this.app.workspace.on("layout-change", () => {
+			this.setNoteBlur(this.reviewingQuestion);
+		});
 		this.render();
 	}
 
 	onClose(): void {
+		if (this.layoutRef) {
+			this.app.workspace.offref(this.layoutRef);
+			this.layoutRef = null;
+		}
+		this.setNoteBlur(false);
 		this.renderer.unload();
 		this.contentEl.empty();
 	}
@@ -35,6 +45,7 @@ export class ReviewModal extends Modal {
 
 		const card = this.plugin.store.getCard(this.file.path);
 		if (!card || card.questions.length === 0) {
+			this.setNoteBlur(false);
 			contentEl.createEl("p", {
 				text: "This note has no review questions yet. Add one, or generate them with ChatGPT, in the Review sidebar.",
 			});
@@ -42,15 +53,19 @@ export class ReviewModal extends Modal {
 		}
 
 		if (this.index >= card.questions.length) {
+			this.setNoteBlur(false);
 			this.renderGrade(card);
 			return;
 		}
 
 		const question = card.questions[this.index];
 		if (!question) {
+			this.setNoteBlur(false);
 			this.renderGrade(card);
 			return;
 		}
+
+		this.setNoteBlur(true);
 
 		contentEl.createEl("p", {
 			cls: "super-tutor-muted",
@@ -114,6 +129,22 @@ export class ReviewModal extends Modal {
 				void this.chooseGrade(grade, interval);
 			});
 		}
+	}
+
+	private setNoteBlur(active: boolean): void {
+		this.reviewingQuestion = active;
+		document.querySelectorAll(".super-tutor-reviewing").forEach((element) => {
+			element.classList.remove("super-tutor-reviewing");
+		});
+		if (!active) {
+			return;
+		}
+		this.app.workspace.iterateAllLeaves((leaf) => {
+			const view = leaf.view;
+			if (view instanceof MarkdownView && view.file?.path === this.file.path) {
+				view.containerEl.addClass("super-tutor-reviewing");
+			}
+		});
 	}
 
 	private async chooseGrade(grade: Grade, interval: number): Promise<void> {

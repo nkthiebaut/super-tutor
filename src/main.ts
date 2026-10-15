@@ -1,10 +1,12 @@
 import { Notice, Plugin, TFile, type TAbstractFile } from "obsidian";
+import { applyEditsToMarkdown, type NoteEdit } from "./note-review";
 import { fileHasReviewTag, listReviewFiles } from "./notes";
-import type { GeneratedQuestion } from "./openai";
+import { verifyNote, type GeneratedQuestion } from "./openai";
 import { applyGrade, todayString } from "./scheduler";
 import { SuperTutorSettingTab } from "./settings";
 import { createId, ReviewStore } from "./store";
 import type { CardState, Grade } from "./types";
+import { NoteReviewModal } from "./ui/note-review-modal";
 import { ReviewView, VIEW_TYPE_REVIEW } from "./ui/review-view";
 
 export default class SuperTutorPlugin extends Plugin {
@@ -12,6 +14,7 @@ export default class SuperTutorPlugin extends Plugin {
 	private refreshListeners = new Set<() => void>();
 	private activeNote: TFile | null = null;
 	private unloaded = false;
+	private verifying = false;
 	private persistQueue: Promise<void> = Promise.resolve();
 
 	async onload(): Promise<void> {
@@ -26,6 +29,20 @@ export default class SuperTutorPlugin extends Plugin {
 			name: "Open review",
 			callback: () => {
 				void this.activateReviewView();
+			},
+		});
+		this.addCommand({
+			id: "verify-note",
+			name: "Check and improve note with ChatGPT",
+			checkCallback: (checking) => {
+				const file = this.app.workspace.getActiveFile();
+				if (!file || file.extension !== "md") {
+					return false;
+				}
+				if (!checking) {
+					void this.reviewNote(file);
+				}
+				return true;
 			},
 		});
 		this.addSettingTab(new SuperTutorSettingTab(this.app, this));
@@ -68,6 +85,9 @@ export default class SuperTutorPlugin extends Plugin {
 
 	onunload(): void {
 		this.unloaded = true;
+		document.querySelectorAll(".super-tutor-reviewing").forEach((element) => {
+			element.classList.remove("super-tutor-reviewing");
+		});
 	}
 
 	addRefreshListener(listener: () => void): () => void {
@@ -180,6 +200,62 @@ export default class SuperTutorPlugin extends Plugin {
 		}
 		await this.persist();
 		this.refreshViews();
+	}
+
+	isVerifying(): boolean {
+		return this.verifying;
+	}
+
+	async reviewNote(file: TFile): Promise<void> {
+		if (this.verifying) {
+			return;
+		}
+		this.verifying = true;
+		this.refreshViews();
+		try {
+			const review = await verifyNote(this, file);
+			if (!review || this.unloaded) {
+				return;
+			}
+			new NoteReviewModal(this.app, review, file.path, (edits) => {
+				void this.applyNoteEdits(file, edits);
+			}).open();
+		} finally {
+			this.verifying = false;
+			if (!this.unloaded) {
+				this.refreshViews();
+			}
+		}
+	}
+
+	async applyNoteEdits(file: TFile, edits: readonly NoteEdit[]): Promise<void> {
+		if (edits.length === 0) {
+			return;
+		}
+		let applied = 0;
+		let missed = 0;
+		try {
+			await this.app.vault.process(file, (data) => {
+				const result = applyEditsToMarkdown(data, edits);
+				applied = result.applied;
+				missed = result.missed;
+				return result.markdown;
+			});
+		} catch (error) {
+			const message = error instanceof Error ? error.message : "Could not update the note.";
+			new Notice(`Could not apply edits. ${message}`);
+			return;
+		}
+		if (applied === 0) {
+			new Notice(
+				missed > 0 ? "None of the accepted edits matched the note. Nothing was changed." : "Nothing to change.",
+			);
+			return;
+		}
+		const appliedLabel = `Applied ${applied} edit${applied === 1 ? "" : "s"}.`;
+		const missedLabel =
+			missed > 0 ? ` ${missed} did not match the note and ${missed === 1 ? "was" : "were"} skipped.` : "";
+		new Notice(`${appliedLabel}${missedLabel}`);
 	}
 
 	async gradeNote(path: string, grade: Grade): Promise<void> {

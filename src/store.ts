@@ -10,7 +10,7 @@ import {
 } from "./types";
 
 // Older versions saved their default model into settings, so it would otherwise mask DEFAULT_MODEL.
-const PREVIOUS_DEFAULT_MODEL = "gpt-4o-mini";
+const PREVIOUS_DEFAULT_MODELS = new Set(["gpt-4o-mini", "gpt-5"]);
 
 export function createId(): string {
 	if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -147,7 +147,7 @@ function normalizeSettings(raw: unknown): PluginSettings {
 	if (typeof record.openaiApiKey === "string") {
 		settings.openaiApiKey = record.openaiApiKey;
 	}
-	if (typeof record.model === "string" && record.model.trim() && record.model.trim() !== PREVIOUS_DEFAULT_MODEL) {
+	if (typeof record.model === "string" && record.model.trim() && !PREVIOUS_DEFAULT_MODELS.has(record.model.trim())) {
 		settings.model = record.model.trim();
 	} else {
 		settings.model = DEFAULT_MODEL;

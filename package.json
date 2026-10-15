@@ -1,7 +1,7 @@
 {
 	"name": "super-tutor",
-	"version": "1.0.2",
-	"description": "Spaced repetition for notes tagged #review, with manual or ChatGPT questions.",
+	"version": "1.1.0",
+	"description": "Spaced repetition for notes tagged #review, with manual or ChatGPT questions and note checks.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
